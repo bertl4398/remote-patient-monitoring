@@ -65,6 +65,7 @@
         <div class="col">
           <button id="record" class="btn btn-danger" disabled>Start Recording</button>
           <button id="upload" class="btn btn-success" disabled>Upload Data</button>
+          <button id="hr-upload" class="btn btn-info">Upload Data</button>
         </div>
       </div>
     </div>
@@ -83,10 +84,13 @@
     // });
 
     var recordButton, stopButton, recorder, liveStream;
-
+    var heartrate = new Array();
     var video = document.querySelector("#videoElement");
     recordButton = document.getElementById("record");
     stopButton = document.getElementById("upload");
+
+    var hrButton = document.getElementById("hr-upload");
+    hrButton.addEventListener('click', uploadHrData);
 
     if (navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ audio: true, video: true })
@@ -134,8 +138,30 @@
       document.body.removeChild(link);
     }
 
+    function uploadHrData() {
+      var array = new Uint32Array(50);
+      window.crypto.getRandomValues(array);
+      var data = {
+        hr: heartrate,
+        bin: btoa(array)
+      }
+      $.ajax({
+            type: "POST",
+            url: "{{ url_for('upload') }}",
+            data: JSON.stringify(data),
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                console.log('Success!');
+            },
+        });
+    }
+
     function updateHeartRate() {
-      document.getElementById("heartrate").innerHTML =  Math.floor((Math.random() * 126) + 10);
+      var hr = Math.floor((Math.random() * 126) + 10);
+      heartrate.push(hr);
+      document.getElementById("heartrate").innerHTML = hr;
 
       $("#heartrate-icon").animate({'opacity':0},200);
       $("#heartrate-icon").animate({'opacity':1},200);

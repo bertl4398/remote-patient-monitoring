@@ -1,4 +1,5 @@
 import os
+import json
 import threading
 
 from flask import Flask
@@ -60,9 +61,12 @@ def create_app(test_config=None):
 
         return jsonify()
 
-    @app.route("/api/upload")
+    @app.route("/api/upload", methods=("GET", "POST",))
     def upload():
         print("Upload data...")
+        data = json.loads(request.data)
+        print(data["hr"])
+        print(data["bin"])
         return jsonify()
 
     return app
