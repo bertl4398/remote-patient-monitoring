@@ -63,8 +63,8 @@
       </div>
       <div class="row">
         <div class="col">
-          <button id="record" class="btn btn-danger">Start Recording</button>
-          <button id="upload" class="btn btn-success">Upload Data</button>
+          <button id="record" class="btn btn-danger" disabled>Start Recording</button>
+          <button id="upload" class="btn btn-success" disabled>Upload Data</button>
         </div>
       </div>
     </div>
@@ -75,18 +75,65 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
     <script>
-    $("#record").bind('click', function() {
-      $.getJSON("{{ url_for('record') }}", function(data) {
-        //
-      });
-      return false;
-    });
-    $("#upload").bind('click', function() {
-      $.getJSON("{{ url_for('upload') }}", function(data) {
-        //
-      });
-      return false;
-    });
+    // $("#record").bind('click', function() {
+    //   $.getJSON("{{ url_for('record') }}", function(data) {
+    //     //
+    //   });
+    //   return false;
+    // });
+
+    var recordButton, stopButton, recorder, liveStream;
+
+    var video = document.querySelector("#videoElement");
+    recordButton = document.getElementById("record");
+    stopButton = document.getElementById("upload");
+
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+        .then(function (stream) {
+          liveStream = stream;
+          video.srcObject = stream;
+
+          recordButton.disabled = false;
+          recordButton.addEventListener('click', startRecording);
+          stopButton.addEventListener('click', stopRecording);
+        })
+        .catch(function (err0r) {
+          console.log("Something went wrong!");
+        });
+    }
+
+    function startRecording() {
+      recorder = new MediaRecorder(liveStream);
+
+      recorder.addEventListener('dataavailable', onRecordingReady);
+
+      recordButton.disabled = true;
+      stopButton.disabled = false;
+
+      recorder.start();
+    }
+    function stopRecording() {
+      recordButton.disabled = false;
+      stopButton.disabled = true;
+
+      // Stopping the recorder will eventually trigger the 'dataavailable' event and we can complete the recording process
+      recorder.stop();
+    }
+    function onRecordingReady(e) {
+      // var video = document.getElementById('recording');
+      // // e.data contains a blob representing the recording
+      // video.src = URL.createObjectURL(e.data);
+      // video.play();
+      var blob = e.data;
+      var link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', 'video.mp4');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     function updateHeartRate() {
       document.getElementById("heartrate").innerHTML =  Math.floor((Math.random() * 126) + 10);
 
@@ -95,17 +142,7 @@
 
       setTimeout(updateHeartRate, 1000);
     }
-    var video = document.querySelector("#videoElement");
 
-    if (navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(function (stream) {
-          video.srcObject = stream;
-        })
-        .catch(function (err0r) {
-          console.log("Something went wrong!");
-        });
-    }
     updateHeartRate();
     </script>
   </body>
