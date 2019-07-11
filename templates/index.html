@@ -64,7 +64,7 @@
         <div class="col">
           <button id="record" class="btn btn-danger" disabled>Start Recording</button>
           <button id="upload" class="btn btn-success" disabled>Upload Data</button>
-          <button id="hr-upload" class="btn btn-info">Upload Data</button>
+          <button id="hr-upload" class="btn btn-info">Test Upload</button>
         </div>
       </div>
     </div>
@@ -129,12 +129,27 @@
       // video.src = URL.createObjectURL(e.data);
       // video.play();
       var blob = e.data;
-      var link = document.createElement('a');
-      link.setAttribute('href', URL.createObjectURL(blob));
-      link.setAttribute('download', 'video.mp4');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // var link = document.createElement('a');
+      // link.setAttribute('href', URL.createObjectURL(blob));
+      // link.setAttribute('download', 'video.mp4');
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link);
+      var data = {
+        hr: heartrate,
+        video: btoa(blob)
+      }
+      $.ajax({
+            type: "POST",
+            url: "{{ url_for('uploaddataapi') }}",
+            data: JSON.stringify(data),
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                console.log('Success!');
+            },
+        });
     }
 
     function uploadHrData() {
