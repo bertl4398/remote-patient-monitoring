@@ -1,0 +1,5 @@
+Flask
+flask-restful
+python-gnupg
+minio
+gunicorn
