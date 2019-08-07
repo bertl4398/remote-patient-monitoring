@@ -14,6 +14,8 @@ def create_app():
     app.config.from_object('config')
     api.init_app(app)
 
+    logger.info(f'Config {config.as_dict()}')
+
     @app.route("/")
     def index():
         return render_template('index.html')
